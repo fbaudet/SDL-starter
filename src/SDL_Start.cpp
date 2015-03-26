@@ -1,5 +1,5 @@
 
-#include "SDL_Start.hpp"
+#include "../includes/SDL_Start.hpp"
 
 std::string SDL_Start::errorText = "";
 
@@ -54,8 +54,8 @@ bool SDL_Start::initSDL() {
 }
 
 void SDL_Start::mainLoop() {
-    while (!_input.finish()) {
-        _input.updateEvent();
+    while (42) {
+        ;
     }
 }
 

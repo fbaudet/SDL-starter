@@ -13,7 +13,7 @@ public:
     virtual ~SDL_Start(void);
 
     bool initSDL();
-    bool mainLoop();
+    void mainLoop();
 
     int getHeight(void) const;
     std::string getTitle(void) const;
