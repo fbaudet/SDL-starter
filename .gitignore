@@ -27,7 +27,7 @@
 *.out
 *.app
 
-nbproject/
-Makefile
-/dist/
-/build/
+# CodeBlocks
+*.cbp
+*.depend
+*.layout
