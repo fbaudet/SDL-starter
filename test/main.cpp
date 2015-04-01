@@ -1,5 +1,5 @@
 
-#include "../includes/SDL_Start.hpp"
+#include "../include/SDL_Start.hpp"
 
 int main(int argc, char** argv)
 {

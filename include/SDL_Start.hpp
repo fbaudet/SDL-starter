@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "SDL_Input.hpp"
 
 class SDL_Start {
@@ -20,11 +21,16 @@ public:
     int                 getWidth(void) const;
     SDL_Window *        getWindow(void) const;
     SDL_Input *         getInput(void) const;
+    bool                getFullScreen(void) const;
 
     void                setHeight(int);
     void                setTitle(std::string);
     void                setWidth(int);
     void                setWindow(SDL_Window*);
+    void                setFullScreen(bool);
+
+    void                swapFullScreen(void);
+    void				showDisplayModes(void);
 
     class SDLException : public std::exception {
     public:
@@ -37,6 +43,7 @@ protected:
     int                 _width;
     int                 _height;
     std::string         _title;
+    bool                _fullscreen;
 
     SDL_Window *        _window;
     SDL_Input *         _input;

@@ -113,19 +113,3 @@ int						SDL_Input::getYRel(void) const
 {
 	return this->_yRel;
 }
-
-/**
- *******************  SETTERS  *******************
- */
-
-
-
- /**
- *******************  NON MEMBERS METHODS  *******************
- */
-
-
-
-
-
-

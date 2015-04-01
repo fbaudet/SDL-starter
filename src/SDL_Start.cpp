@@ -25,7 +25,7 @@ SDL_Start::~SDL_Start(void) {
 
 bool					SDL_Start::initSDL() {
 
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		SDL_Start::errorText = "Error SDL_Init : initialization failed";
 		throw SDLException();
 		SDL_Quit();
@@ -51,10 +51,44 @@ bool					SDL_Start::initSDL() {
 
 void					SDL_Start::mainLoop() {
 	SDL_Input * input = this->getInput();
+	this->showDisplayModes();
+
+	SDL_Surface * image;
+	image = SDL_LoadBMP("img/object025.bmp");
+	if (!image)
+		std::cout << SDL_GetError() << std::endl;
+
 	while (!input->isFinished()) {
 		input->updateEvent();
-		if (input->isKey(SDL_SCANCODE_ESCAPE) && input->isKey(SDL_SCANCODE_END))
+		if (input->isKey(SDL_SCANCODE_ESCAPE))
 			break;
+		if (input->isKey(SDL_SCANCODE_LCTRL) && input->isKey(SDL_SCANCODE_F))
+			this->swapFullScreen();
+
+		SDL_Delay(500);
+		break;
+	}
+}
+
+void                	SDL_Start::swapFullScreen(void)
+{
+	if (this->getFullScreen())
+		this->setFullScreen(false);
+	else
+		this->setFullScreen(true);
+}
+
+void					SDL_Start::showDisplayModes(void)
+{
+	int modeNumber = SDL_GetNumDisplayModes(0);
+	int error;
+	SDL_DisplayMode	mode;
+
+	for (int i = 0; i < modeNumber + 1; ++i)
+	{
+		if ((error = SDL_GetDisplayMode(0, i, &mode)) < 0)
+			break;
+		std::cout << "Mode " << i << " :\t" << mode.w << "\t" << mode.h << "\t" << mode.refresh_rate << "\t" << SDL_GetPixelFormatName(mode.format) << std::endl;
 	}
 }
 
@@ -62,24 +96,34 @@ void					SDL_Start::mainLoop() {
  *******************  GETTERS  *******************
  */
 
-int						SDL_Start::getHeight() const {
+int						SDL_Start::getHeight() const
+{
 	return this->_height;
 }
 
-std::string				SDL_Start::getTitle() const {
+std::string				SDL_Start::getTitle() const
+{
 	return this->_title;
 }
 
-int						SDL_Start::getWidth() const {
+int						SDL_Start::getWidth() const
+{
 	return this->_width;
 }
 
-SDL_Window *			SDL_Start::getWindow() const {
+SDL_Window *			SDL_Start::getWindow() const
+{
 	return this->_window;
 }
 
-SDL_Input *				SDL_Start::getInput() const {
+SDL_Input *				SDL_Start::getInput() const
+{
 	return this->_input;
+}
+
+bool					SDL_Start::getFullScreen() const
+{
+	return this->_fullscreen;
 }
 
 /**
@@ -87,16 +131,33 @@ SDL_Input *				SDL_Start::getInput() const {
  */
 
 
-void					SDL_Start::setHeight(int height) {
+void					SDL_Start::setHeight(int height)
+{
 	this->_height = height;
 }
 
-void					SDL_Start::setTitle(std::string title) {
+void					SDL_Start::setTitle(std::string title)
+{
 	this->_title = title;
 }
 
-void					SDL_Start::setWidth(int width) {
+void					SDL_Start::setWidth(int width)
+{
 	this->_width = width;
+}
+
+void					SDL_Start::setFullScreen(bool fs)
+{
+	if (fs)
+	{
+		this->_fullscreen = true;
+		SDL_SetWindowFullscreen(this->getWindow(), SDL_WINDOW_FULLSCREEN);
+	}
+	else
+	{
+		this->_fullscreen = false;
+		SDL_SetWindowFullscreen(this->getWindow(), 0);
+	}
 }
 
 /**
