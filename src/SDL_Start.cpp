@@ -53,10 +53,23 @@ void					SDL_Start::mainLoop() {
 	SDL_Input * input = this->getInput();
 	this->showDisplayModes();
 
-	SDL_Surface * image;
-	image = SDL_LoadBMP("img/object025.bmp");
+	SDL_Surface * image = SDL_LoadBMP("img/object025.bmp");
 	if (!image)
 		std::cout << SDL_GetError() << std::endl;
+
+	SDL_Rect dest = {
+		this->getWidth() / 2 - image->w / 2,
+		this->getHeight() / 2 - image->h / 2,
+		image->w,
+		image->h
+	};
+
+	SDL_Renderer * renderer = SDL_CreateRenderer(this->getWindow(), -1, SDL_RENDERER_ACCELERATED);
+	SDL_SetRenderDrawColor(renderer, 0xEE, 0xEE, 0xEE, 0xFF);
+
+	SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, image);
+	SDL_FreeSurface(image);
+
 
 	while (!input->isFinished()) {
 		input->updateEvent();
@@ -65,9 +78,13 @@ void					SDL_Start::mainLoop() {
 		if (input->isKey(SDL_SCANCODE_LCTRL) && input->isKey(SDL_SCANCODE_F))
 			this->swapFullScreen();
 
-		SDL_Delay(500);
-		break;
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, texture, 0, &dest);
+		SDL_RenderPresent(renderer);
+		SDL_Delay(50);
 	}
+	SDL_DestroyTexture(texture);
+	SDL_DestroyRenderer(renderer);
 }
 
 void                	SDL_Start::swapFullScreen(void)
