@@ -6,7 +6,6 @@
 #include <string>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "SDL_Input.hpp"
 
 class SDL_Start {
 public:
@@ -20,7 +19,6 @@ public:
     std::string         getTitle(void) const;
     int                 getWidth(void) const;
     SDL_Window *        getWindow(void) const;
-    SDL_Input *         getInput(void) const;
     bool                getFullScreen(void) const;
 
     void                setHeight(int);
@@ -37,6 +35,8 @@ public:
         virtual const char* what() const throw ();
     };
 
+    const Uint8 *       state;
+
     static std::string  errorText;
 
 protected:
@@ -44,9 +44,10 @@ protected:
     int                 _height;
     std::string         _title;
     bool                _fullscreen;
+    bool                _continue;
 
     SDL_Window *        _window;
-    SDL_Input *         _input;
+    SDL_Event           _event;
 
 private:
     SDL_Start();

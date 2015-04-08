@@ -8,13 +8,16 @@ std::string				SDL_Start::errorText = "Unexpected Error";
  */
 
 SDL_Start::SDL_Start(int width, int height, std::string title)
-: _width(width), _height(height), _title(title), _input(new SDL_Input()) {
+	: _width(width), _height(height), _title(title), _continue(true)
+{
+	state = SDL_GetKeyboardState(NULL);
 	return;
 }
 
-SDL_Start::~SDL_Start(void) {
-	delete this->getInput();
-	SDL_DestroyWindow(this->getWindow());
+SDL_Start::~SDL_Start(void)
+{
+	if (this->getWindow())
+		SDL_DestroyWindow(this->getWindow());
 	SDL_Quit();
 	return;
 }
@@ -23,9 +26,10 @@ SDL_Start::~SDL_Start(void) {
  ********************  METHODS  ********************
  */
 
-bool					SDL_Start::initSDL() {
-
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+bool					SDL_Start::initSDL()
+{
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
 		SDL_Start::errorText = "Error SDL_Init : initialization failed";
 		throw SDLException();
 		SDL_Quit();
@@ -33,15 +37,16 @@ bool					SDL_Start::initSDL() {
 	}
 
 	this->_window = SDL_CreateWindow(
-			this->_title.c_str(),
+			this->getTitle().c_str(),
 			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			this->_width, this->_height,
+			this->getWidth(), this->getHeight(),
 			SDL_WINDOW_SHOWN);
 
-	if (this->_window == 0) {
+	if (this->_window == 0)
+	{
 		SDL_Start::errorText = "Error SDL_CreateWindow : creation failed";
 		throw SDLException();
-		SDL_DestroyWindow(this->_window);
+		SDL_DestroyWindow(this->getWindow());
 		SDL_Quit();
 		return false;
 	}
@@ -49,41 +54,32 @@ bool					SDL_Start::initSDL() {
 	return true;
 }
 
-void					SDL_Start::mainLoop() {
-	SDL_Input * input = this->getInput();
-	this->showDisplayModes();
-
-	SDL_Surface * image = SDL_LoadBMP("img/object025.bmp");
-	if (!image)
-		std::cout << SDL_GetError() << std::endl;
-
-	SDL_Rect dest = {
-		this->getWidth() / 2 - image->w / 2,
-		this->getHeight() / 2 - image->h / 2,
-		image->w,
-		image->h
-	};
-
-	SDL_Renderer * renderer = SDL_CreateRenderer(this->getWindow(), -1, SDL_RENDERER_ACCELERATED);
+void					SDL_Start::mainLoop()
+{
+	Uint32 timeBegin(SDL_GetTicks()), timeEnd(0), timeRun(0), frameRate(1000 / 50);
+	SDL_Renderer * renderer = SDL_CreateRenderer(this->getWindow(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	SDL_SetRenderDrawColor(renderer, 0xEE, 0xEE, 0xEE, 0xFF);
 
-	SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, image);
-	SDL_FreeSurface(image);
-
-
-	while (!input->isFinished()) {
-		input->updateEvent();
-		if (input->isKey(SDL_SCANCODE_ESCAPE))
-			break;
-		if (input->isKey(SDL_SCANCODE_LCTRL) && input->isKey(SDL_SCANCODE_F))
+	while (this->_continue)
+	{
+		// Events
+		SDL_PollEvent(&_event);
+		if (this->_event.window.event == SDL_WINDOWEVENT_CLOSE || state[SDL_SCANCODE_ESCAPE])
+			_continue = false;
+		if (state[SDL_SCANCODE_LCTRL] && state[SDL_SCANCODE_F])
 			this->swapFullScreen();
 
 		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, texture, 0, &dest);
 		SDL_RenderPresent(renderer);
-		SDL_Delay(50);
+		// Frame Rate
+		timeEnd = SDL_GetTicks();
+		timeRun = timeEnd - timeBegin;
+		if (timeRun < frameRate)
+		{
+			timeBegin = SDL_GetTicks();
+			SDL_Delay(frameRate - timeRun);
+		}
 	}
-	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 }
 
@@ -98,12 +94,11 @@ void                	SDL_Start::swapFullScreen(void)
 void					SDL_Start::showDisplayModes(void)
 {
 	int modeNumber = SDL_GetNumDisplayModes(0);
-	int error;
 	SDL_DisplayMode	mode;
 
 	for (int i = 0; i < modeNumber + 1; ++i)
 	{
-		if ((error = SDL_GetDisplayMode(0, i, &mode)) < 0)
+		if (SDL_GetDisplayMode(0, i, &mode) < 0)
 			break;
 		std::cout << "Mode " << i << " :\t" << mode.w << "\t" << mode.h << "\t" << mode.refresh_rate << "\t" << SDL_GetPixelFormatName(mode.format) << std::endl;
 	}
@@ -131,11 +126,6 @@ int						SDL_Start::getWidth() const
 SDL_Window *			SDL_Start::getWindow() const
 {
 	return this->_window;
-}
-
-SDL_Input *				SDL_Start::getInput() const
-{
-	return this->_input;
 }
 
 bool					SDL_Start::getFullScreen() const
@@ -181,7 +171,8 @@ void					SDL_Start::setFullScreen(bool fs)
  *******************  NON MEMBERS METHODS  *******************
  */
 
-std::ostream &			operator<<(std::ostream& o, SDL_Start const & rhs) {
+std::ostream &			operator<<(std::ostream& o, SDL_Start const & rhs)
+{
 	o << "SDL Window : " << rhs.getTitle() << std::endl;
 	return o;
 }
@@ -190,6 +181,7 @@ std::ostream &			operator<<(std::ostream& o, SDL_Start const & rhs) {
  *******************  EXCEPTIONS  *******************
  */
 
-const char *			SDL_Start::SDLException::what() const throw () {
+const char *			SDL_Start::SDLException::what() const throw ()
+{
 	return (SDL_Start::errorText.c_str());
 }
