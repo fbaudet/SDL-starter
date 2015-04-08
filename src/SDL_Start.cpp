@@ -62,7 +62,7 @@ void					SDL_Start::mainLoop()
 
 	while (this->_continue)
 	{
-		// Events
+		// Event
 		SDL_PollEvent(&_event);
 		if (this->_event.window.event == SDL_WINDOWEVENT_CLOSE || state[SDL_SCANCODE_ESCAPE])
 			_continue = false;
