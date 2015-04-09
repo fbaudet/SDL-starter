@@ -1,2 +1,2 @@
-# SDL_starter
+# SDL-starter
 SDL starter in C++
